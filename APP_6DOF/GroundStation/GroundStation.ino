@@ -93,9 +93,11 @@ void loop() {
   //Transmit LoRa if serial port have data
   if (transmitOn){
     // Serial.println("In transmit");
-    if (int n = Serial.available()) {
-      LoRa.beginPacket();               //header mode, reset FIFO
+    if (Serial.available() > 0) {
+      int n = Serial.available();
+      int c = Serial.read();
       digitalWrite(pin_RFswitch, LOW);  // switch to transmit channel
+      LoRa.beginPacket();               //header mode, reset FIFO
       // int readfromMatlab[50];
       // int pack_index = 0;
       // unsigned long entertime = micros();
@@ -120,8 +122,8 @@ void loop() {
       //   // Serial.print(Serial.read());
       //   Serial.println(Serial.read());
       // }
-      // Serial.print(Serial.read());
-      LoRa.print(Serial.read());
+      // Serial.write(c);
+      LoRa.write(c);
       // Serial.print(",");
       // Serial.print(Serial.readStringUntil(','));
       LoRa.endPacket();

@@ -339,7 +339,7 @@ uint8_t LoRa_read(LoRa* _LoRa, uint8_t address){
 
 	data_addr = address & 0x7F;
 	LoRa_readReg(_LoRa, &data_addr, 1, &read_data, 1);
-	HAL_Delay(1);
+	//HAL_Delay(5);
 
 	return read_data;
 }

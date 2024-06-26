@@ -78,12 +78,8 @@ void Error_Handler(void);
 #define DIO2_GPIO_Port GPIOF
 #define DIO0_Pin GPIO_PIN_10
 #define DIO0_GPIO_Port GPIOF
-#define SPI1_CS_Pin GPIO_PIN_4
-#define SPI1_CS_GPIO_Port GPIOA
-#define IMU_RST_Pin GPIO_PIN_7
-#define IMU_RST_GPIO_Port GPIOA
-#define IMU_DRDY_Pin GPIO_PIN_4
-#define IMU_DRDY_GPIO_Port GPIOC
+#define Mode_Switch_Pin GPIO_PIN_6
+#define Mode_Switch_GPIO_Port GPIOA
 #define IMU_TX_Pin GPIO_PIN_8
 #define IMU_TX_GPIO_Port GPIOD
 #define IMU_RX_Pin GPIO_PIN_9
@@ -99,7 +95,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 
-#define EXT_BUFFER_SIZE 512
+#define EXT_BUFFER_SIZE 1024
 
 
 /* USER CODE END Private defines */
