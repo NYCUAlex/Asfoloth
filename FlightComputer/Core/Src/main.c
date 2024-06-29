@@ -204,6 +204,41 @@ void imu_data_conv_config(IMU *imu, IMU_DATA_TO_SEND_t *out) {
 	proc_data_4(out, data_PA_temp);
 
 }
+
+void imu_data_conv_config_test(IMU *imu, IMU_DATA_TO_SEND_t *out) {
+	out->length = 0;
+	proc_data_1_uint8(out, data_hour);
+	proc_data_1_uint8(out, data_min);
+	proc_data_1_uint8(out, data_sec);
+	proc_data_1_uint8(out, data_subSec);
+	proc_data_2_uint16(out, data_counter);
+	proc_data_2(out, 25.1);
+	proc_data_4(out, 1);
+	proc_data_4(out, 0);
+	proc_data_4(out, 0);
+	proc_data_4(out, 0);
+	proc_data_2(out, 1);
+	proc_data_2(out, 2);
+	proc_data_2(out, 3);
+	proc_data_2(out, 1);
+	proc_data_2(out, 2);
+	proc_data_2(out, 3);
+	proc_data_2(out, 1);
+	proc_data_2(out, 2);
+	proc_data_2(out, 3);
+	proc_data_2(out, -2937);
+	proc_data_2(out, 5087);
+	proc_data_2(out, 2476);
+	proc_data_4(out, 23);
+	proc_data_4(out, 120);
+	proc_data_4(out, 100);
+	proc_data_2(out, 1);
+	proc_data_2(out, 2);
+	proc_data_2(out, 3);
+	proc_data_4(out, 60);
+
+}
+
 void imu_data_conv_onFly(IMU *imu, IMU_DATA_TO_SEND_t *out) {
 	out->length = 0;
 	proc_data_1_uint8(out, data_hour);
@@ -344,9 +379,9 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 		//IMU data gathering
-		IMU_process_data();
-
-		IMU_State_mechine();
+//		IMU_process_data();
+//
+//		IMU_State_mechine();
 
 		/* Get the RTC current Time */
 		HAL_RTC_GetTime(&hrtc, &GetTime, RTC_FORMAT_BIN);
@@ -399,9 +434,19 @@ int main(void)
 
 		//LoRa_receive()
 		HAL_GPIO_WritePin(FEM_CPS_GPIO_Port, FEM_CPS_Pin, GPIO_PIN_SET); //low frequency port switch, RESET for transmit, SET for receive
-		packet_size = LoRa_receive(&myLoRa, received_data, 10);
+
+//		packet_size = LoRa_receive(&myLoRa, received_data, 10);
+		packet_size = LoRa_receive_single(&myLoRa, received_data, 10);
+		/*Process data*/
 		if (packet_size != 0) {
 			printf("LoRa get: %s", received_data);
+			if(received_data[0] == 1){ //reset frame
+
+			}
+			if(received_data[0] == 3){ //switch to flight mode
+				curFlyMode = onFly;
+				printf("fly mode now --> on fly\n");
+			}
 		}
 
 		/*temp sensor*/
@@ -422,7 +467,8 @@ int main(void)
 
 			//packing data from IMU to send via Lora
 			if (curFlyMode == config) {
-				imu_data_conv_config(&imu, &data2Lora);
+//				imu_data_conv_config(&imu, &data2Lora);
+				imu_data_conv_config_test(&imu, &data2Lora);
 			} else if (curFlyMode == onFly) {
 				imu_data_conv_onFly(&imu, &data2Lora);
 			}

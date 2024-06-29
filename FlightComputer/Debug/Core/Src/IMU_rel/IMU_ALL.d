@@ -33,8 +33,8 @@ Core/Src/IMU_rel/IMU_ALL.o: ../Core/Src/IMU_rel/IMU_ALL.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Core/Inc/IMU_rel/IMU_ALL.h \
- C:/Users/liuWilly/source/repos/Asfoloth/FlightComputer/LoRa/LoRa.h \
- ../Core/Inc/main.h ../Core/Inc/dma.h ../Core/Inc/IMU_rel/xsens_mti.h \
+ D:/YiYuan/Asfoloth/FlightComputer/LoRa/LoRa.h ../Core/Inc/main.h \
+ ../Core/Inc/dma.h ../Core/Inc/IMU_rel/xsens_mti.h \
  ../Core/Inc/IMU_rel/xsens_constants.h \
  ../Core/Inc/IMU_rel/xsens_utility.h ../Core/Inc/IMU_rel/xsens_mdata2.h \
  ../Core/Inc/IMU_rel/float16Tool.h \
@@ -75,7 +75,7 @@ Core/Src/IMU_rel/IMU_ALL.o: ../Core/Src/IMU_rel/IMU_ALL.c \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
 ../Core/Inc/IMU_rel/IMU_ALL.h:
-C:/Users/liuWilly/source/repos/Asfoloth/FlightComputer/LoRa/LoRa.h:
+D:/YiYuan/Asfoloth/FlightComputer/LoRa/LoRa.h:
 ../Core/Inc/main.h:
 ../Core/Inc/dma.h:
 ../Core/Inc/IMU_rel/xsens_mti.h:

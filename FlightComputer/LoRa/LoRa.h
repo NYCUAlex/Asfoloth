@@ -126,10 +126,13 @@ void LoRa_setPower(LoRa* _LoRa, uint8_t power);
 void LoRa_setOCP(LoRa* _LoRa, uint8_t current);
 void LoRa_setTOMsb_setCRCon(LoRa* _LoRa);
 void LoRa_setSyncWord(LoRa* _LoRa, uint8_t syncword);
+void LoRa_setImplicitMode(LoRa* _LoRa);
 uint8_t LoRa_transmit(LoRa* _LoRa, uint8_t* data, uint8_t length, uint16_t timeout);
 void LoRa_startReceiving(LoRa* _LoRa);
 uint8_t LoRa_receive(LoRa* _LoRa, uint8_t* data, uint8_t length);
+uint8_t LoRa_receive_single(LoRa* _LoRa, uint8_t* data, uint8_t length);
 void LoRa_receive_IT(LoRa* _LoRa, uint8_t* data, uint8_t length);
 int LoRa_getRSSI(LoRa* _LoRa);
+
 
 uint16_t LoRa_init(LoRa* _LoRa);

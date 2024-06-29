@@ -323,6 +323,24 @@ void LoRa_setSyncWord(LoRa* _LoRa, uint8_t syncword){
 }
 
 /* ----------------------------------------------------------------------------- *\
+		name        : LoRa_setImplicitMode
+
+		description : set LoRa Modem header mode to implicit mode(non header)
+
+		arguments   :
+			LoRa* LoRa        --> LoRa object handler
+
+		returns     : Nothing
+\* ----------------------------------------------------------------------------- */
+void LoRa_setImplicitMode(LoRa* _LoRa){
+	uint8_t read;
+
+	read = LoRa_read(_LoRa, RegModemConfig1);
+	LoRa_write(_LoRa, RegModemConfig1, read|0x01);
+	HAL_Delay(1);
+}
+
+/* ----------------------------------------------------------------------------- *\
 		name        : LoRa_read
 
 		description : read a register by an address
@@ -496,6 +514,63 @@ uint8_t LoRa_receive(LoRa* _LoRa, uint8_t* data, uint8_t length){
 			data[i] = LoRa_read(_LoRa, RegFiFo);
 	}
 	LoRa_gotoMode(_LoRa, RXCONTIN_MODE);
+    return min;
+}
+
+/* ----------------------------------------------------------------------------- *\
+		name        : LoRa_Receive_single
+
+		description : Read received data from module
+
+		arguments   :
+			LoRa*    LoRa     --> LoRa object handler
+			uint8_t  data			--> A pointer to the array that you want to write bytes in it
+			uint8_t	 length   --> Determines how many bytes you want to read
+
+		returns     : The number of bytes received
+\* ----------------------------------------------------------------------------- */
+uint8_t LoRa_receive_single(LoRa* _LoRa, uint8_t* data, uint8_t length){
+	//condition 1: Not in Rx single mode, IRQ flag=0                                   ==> Do Rx init, then go to Rx single mode
+	//condition 2: In Rx single mode, IRQ flag=0                                       ==> LoRa on receiving, do nothing
+	//condition 3: Return to standby mode, IRQ flag: RxTimeout=1(0x80)                 ==> Clear IRQ flag, check the setting, if all correct, go Rx single mode
+	//condition 4: Return to standby mode, IRQ flag: PayloadCrcError=1(0x20)           ==> Clear IRQ flag, maybe link is dirty, go Rx single mode reread data
+	//condition 5: Return to standby mode, IRQ flag: ValidHeader(0x10)&RX done=1(0x40) ==> Clear IRQ flag, start read FIFO ,then go to RX single mode again
+
+	uint8_t cur_mode;
+	uint8_t read;
+	uint8_t number_of_bytes;
+	uint8_t min = 0;
+
+	//read current mode
+	cur_mode = LoRa_read(_LoRa, RegOpMode)&0x07;//0x07 mask:0000 0111
+	//read IRQ
+	read = LoRa_read(_LoRa, RegIrqFlags);
+
+	LoRa_gotoMode(_LoRa, STNBY_MODE);
+
+	if((cur_mode!=RXSINGLE_MODE)&&(read==0)){ // condition 1
+		//Rx init
+		LoRa_write(_LoRa, RegFiFoAddPtr, 0); //set FiFoAddPtr to FiFoRxBaseAddr
+		//Rx mode request
+		LoRa_gotoMode(_LoRa, RXSINGLE_MODE);
+	}
+	else if((cur_mode==RXSINGLE_MODE) && (read==0)){ //condition 2
+	}
+	else if((cur_mode!=RXSINGLE_MODE)&&((read&0x80)||(read&0x20))){// condition 3,4
+		LoRa_write(_LoRa, RegIrqFlags, read);  //clear IRQ
+		LoRa_gotoMode(_LoRa, RXSINGLE_MODE);   //Rx mode request
+	}
+	else if((cur_mode!=RXSINGLE_MODE)&&(read&0x40)&&(read&0x10)){// condition 5
+		LoRa_write(_LoRa, RegIrqFlags, read);    //clear IRQ
+		number_of_bytes = LoRa_read(_LoRa, RegRxNbBytes);  //Read packet size(FifoRxBytesNb 0x13) in explicit mode
+		read = LoRa_read(_LoRa, RegFiFoRxCurrentAddr); //method 1 of set FifoAddrPtr
+		LoRa_write(_LoRa, RegFiFoAddPtr, read);
+		min = length >= number_of_bytes ? number_of_bytes : length;// if setted length>read NB,choose read NB
+		for(int i=0; i<min; i++){
+			data[i] = LoRa_read(_LoRa, RegFiFo); //read data FIFO
+		}
+		LoRa_gotoMode(_LoRa, RXSINGLE_MODE);   //Rx mode request
+	}
     return min;
 }
 
