@@ -23,7 +23,7 @@ LoRa newLoRa(){
 	new_LoRa.spredingFactor        = SF_7      ;
 	new_LoRa.bandWidth			   = BW_125KHz ;
 	new_LoRa.crcRate               = CR_4_5    ;
-	new_LoRa.power				   = POWER_20db;
+//	new_LoRa.power				   = POWER_20db;
 	new_LoRa.overCurrentProtection = 100       ;
 	new_LoRa.preamble			   = 8         ;
 
@@ -235,11 +235,9 @@ void LoRa_setSpreadingFactor(LoRa* _LoRa, int SF){
 	read = LoRa_read(_LoRa, RegModemConfig2);
 	HAL_Delay(10);
 
-	data = (SF << 4) + (read & 0x0F);
+	data = (SF << 4) | (_LoRa->CRCon << 2) | (read & 0x03);
 	LoRa_write(_LoRa, RegModemConfig2, data);
 	HAL_Delay(10);
-	
-	LoRa_setAutoLDO(_LoRa);
 }
 
 /* ----------------------------------------------------------------------------- *\
@@ -563,8 +561,10 @@ uint8_t LoRa_receive_single(LoRa* _LoRa, uint8_t* data, uint8_t length){
 	else if((cur_mode!=RXSINGLE_MODE)&&(read&0x40)&&(read&0x10)){// condition 5
 		LoRa_write(_LoRa, RegIrqFlags, read);    //clear IRQ
 		number_of_bytes = LoRa_read(_LoRa, RegRxNbBytes);  //Read packet size(FifoRxBytesNb 0x13) in explicit mode
-		read = LoRa_read(_LoRa, RegFiFoRxCurrentAddr); //method 1 of set FifoAddrPtr
+		read = LoRa_read(_LoRa, RegFiFoRxCurrentAddr);
 		LoRa_write(_LoRa, RegFiFoAddPtr, read);
+		read = LoRa_read(_LoRa, RegIrqFlags);//test
+
 		min = length >= number_of_bytes ? number_of_bytes : length;// if setted length>read NB,choose read NB
 		for(int i=0; i<min; i++){
 			data[i] = LoRa_read(_LoRa, RegFiFo); //read data FIFO
@@ -607,50 +607,67 @@ uint16_t LoRa_init(LoRa* _LoRa){
 	if(LoRa_isvalid(_LoRa)){
 		// goto sleep mode:
 			LoRa_gotoMode(_LoRa, SLEEP_MODE);
+			_LoRa->current_mode = SLEEP_MODE;
 			HAL_Delay(10);
 
 		// turn on LoRa mode:
 			read = LoRa_read(_LoRa, RegOpMode);
 			HAL_Delay(10);
-			data = read | 0x80;
+			data = read | (LORA_MODEM<<7);
 			LoRa_write(_LoRa, RegOpMode, data);
 			HAL_Delay(100);
 
 		// set frequency:
 			LoRa_setFrequency(_LoRa, _LoRa->frequency);
+			if(_LoRa->frequency<525){ //if freq<525MHz, set low freq mode on
+				read = LoRa_read(_LoRa, RegOpMode);
+				data = read | (1<<3);
+				LoRa_write(_LoRa, RegOpMode, data);
+			}
 
 		// set output power gain:
-			LoRa_setPower(_LoRa, _LoRa->power);
+		data = (_LoRa->paselect << 7) | (_LoRa->maxpower << 4) | (_LoRa->outputpower);
+		LoRa_write(_LoRa, RegPaConfig, data);
 
 		// set over current protection:
 			LoRa_setOCP(_LoRa, _LoRa->overCurrentProtection);
 
 		// set LNA gain:
-			LoRa_write(_LoRa, RegLna, 0x23);
-
-		// set spreading factor, CRC on, and Timeout Msb:
-			LoRa_setTOMsb_setCRCon(_LoRa);
-			LoRa_setSpreadingFactor(_LoRa, _LoRa->spredingFactor);
-
-		// set Timeout Lsb:
-			LoRa_write(_LoRa, RegSymbTimeoutL, 0xFF);
+			LoRa_write(_LoRa, RegLna, 0x20);
 
 		// set bandwidth, coding rate and expilicit mode:
 			// 8 bit RegModemConfig --> | X | X | X | X | X | X | X | X |
 			//       bits represent --> |   bandwidth   |     CR    |I/E|
-			data = 0;
-			data = (_LoRa->bandWidth << 4) + (_LoRa->crcRate << 1);
+			data = (_LoRa->bandWidth << 4) | (_LoRa->crcRate << 1) | (_LoRa->implicit_on);
 			LoRa_write(_LoRa, RegModemConfig1, data);
-			LoRa_setAutoLDO(_LoRa);
+
+		// set spreading factor, CRC on, and Timeout Msb:
+			LoRa_setSpreadingFactor(_LoRa, _LoRa->spredingFactor);
+
+		// set Timeout Lsb:
+			LoRa_write(_LoRa, RegSymbTimeoutL, 0x64);
 
 		// set preamble:
 			LoRa_write(_LoRa, RegPreambleMsb, _LoRa->preamble >> 8);
 			LoRa_write(_LoRa, RegPreambleLsb, _LoRa->preamble >> 0);
 
+		// set LowDataRateOptimization
+//			LoRa_setAutoLDO(_LoRa);  //transmitor and receiver need the same setting
+
 		// DIO mapping:   --> DIO: RxDone
-			read = LoRa_read(_LoRa, RegDioMapping1);
-			data = read | 0x3F;
-			LoRa_write(_LoRa, RegDioMapping1, data);
+//			read = LoRa_read(_LoRa, RegDioMapping1);
+//			data = read | 0x3F;
+//			LoRa_write(_LoRa, RegDioMapping1, data);
+
+			//Set base address
+			LoRa_write(_LoRa, RegFiFoRxBaseAddr, 0x00);
+			LoRa_write(_LoRa, RegFiFoTxBaseAddr, 0x00);
+
+			//Setting in errata note
+			read = LoRa_read(_LoRa, 0x31);
+			LoRa_write(_LoRa, 0x31, read&0x7F);
+			LoRa_write(_LoRa, 0x2F, 0x40);
+			LoRa_write(_LoRa, 0x30, 0);
 
 		// goto standby mode:
 			LoRa_gotoMode(_LoRa, STNBY_MODE);

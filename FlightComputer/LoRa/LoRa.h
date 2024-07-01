@@ -19,6 +19,10 @@
 #define RXCONTIN_MODE			5
 #define RXSINGLE_MODE			6
 
+//------- Modem -----------//
+#define LORA_MODEM          1
+#define FSK_MODEM           0
+
 //------- BANDWIDTH -------//
 #define BW_7_8KHz			0
 #define BW_10_4KHz			1
@@ -37,6 +41,10 @@
 #define CR_4_7				3
 #define CR_4_8				4
 
+//- Implicit header mode ---//
+#define EXPLICIT            0
+#define IMPLICIT            1
+
 //--- SPREADING FACTORS ---//
 #define SF_7				7
 #define SF_8				8
@@ -46,6 +54,9 @@
 #define SF_12				12
 
 //------ POWER GAIN ------//
+#define RFO                 0
+#define PA_BOOST            1
+
 #define POWER_11db			0xF6
 #define POWER_14db			0xF9
 #define POWER_17db			0xFC
@@ -97,15 +108,22 @@ typedef struct LoRa_setting{
 	SPI_HandleTypeDef*	hSPIx;
 	
 	// Module settings:
-	int			current_mode;
-	int 			frequency;
+	bool            LoRa_modem;       //LoRa modem:true, FSK modem:false
+	int		     	current_mode;       //current operation mode(standby, sleep,...)
+	int 			frequency;      //MHz
 	uint8_t			spredingFactor;
 	uint8_t			bandWidth;
 	uint8_t			crcRate;
 	uint16_t		preamble;
 	uint8_t			power;
+	uint8_t         paselect;
+	uint8_t         maxpower;
+	uint8_t	        outputpower;
 	uint8_t			overCurrentProtection;
-	
+	uint8_t         implicit_on;
+	uint8_t         PaDac;
+	uint8_t         CRCon;
+	bool            TCXOon;
 } LoRa;
 
 LoRa newLoRa(void);

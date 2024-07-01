@@ -326,13 +326,20 @@ int main(void)
 	myLoRa.DIO0_port = DIO0_GPIO_Port;
 	myLoRa.DIO0_pin = DIO0_Pin;
 	myLoRa.hSPIx = &hspi4;
+	myLoRa.LoRa_modem = LORA_MODEM;
 	myLoRa.frequency = 433;             	// default = 433 		MHz
-	myLoRa.spredingFactor = SF_7;           // default = SF_7
+	myLoRa.paselect = RFO;
+	myLoRa.maxpower = 7;                    // 0~7 Pmax = 10.8+0.6*maxpower
+	myLoRa.outputpower = 10;                // 0~15, Pout(RFO) = Pmax-(15-outputpower), Pout(PA_BOOST) = = 17-(15-outputpower)
+	myLoRa.PaDac = 0x84;                    // 0x84:max power = 17dBm   0x87:max power = 20dBm in PA_BOOST pin//-4~15
+	myLoRa.overCurrentProtection = 100;     // default = 100 		mA
 	myLoRa.bandWidth = BW_125KHz;       	// default = BW_125	KHz
 	myLoRa.crcRate = CR_4_5;          		// default = CR_4_5
-	myLoRa.power = POWER_20db;      		// default = 20db
-	myLoRa.overCurrentProtection = 100;     // default = 100 		mA
+	myLoRa.implicit_on = EXPLICIT;          // default = EXPLICIT
+	myLoRa.spredingFactor = SF_7;           // default = SF_7
+	myLoRa.CRCon = 0;
 	myLoRa.preamble = 10;              		// default = 8;
+	myLoRa.TCXOon = 0;
 
 	uint16_t LoRa_status = LoRa_init(&myLoRa);
 	if (LoRa_status == LORA_OK) {            //initialize LoRa configuration
@@ -340,9 +347,9 @@ int main(void)
 	} else {
 		printf("LoRa failed :( \n Error code: %d \n", LoRa_status);
 	}
-	LoRa_setLowDaraRateOptimization(&myLoRa, 1);
+//	LoRa_setLowDaraRateOptimization(&myLoRa, 1);
 	LoRa_startReceiving(&myLoRa);
-	uint8_t received_data[10];
+	uint8_t received_data[8];
 	uint8_t packet_size = 0;
 	/*Lora init end===========================================================*/
 
@@ -436,7 +443,7 @@ int main(void)
 		HAL_GPIO_WritePin(FEM_CPS_GPIO_Port, FEM_CPS_Pin, GPIO_PIN_SET); //low frequency port switch, RESET for transmit, SET for receive
 
 //		packet_size = LoRa_receive(&myLoRa, received_data, 10);
-		packet_size = LoRa_receive_single(&myLoRa, received_data, 10);
+		packet_size = LoRa_receive_single(&myLoRa, received_data, sizeof(received_data)/sizeof(received_data[0]));
 		/*Process data*/
 		if (packet_size != 0) {
 			printf("LoRa get: %s", received_data);
@@ -467,8 +474,8 @@ int main(void)
 
 			//packing data from IMU to send via Lora
 			if (curFlyMode == config) {
-//				imu_data_conv_config(&imu, &data2Lora);
-				imu_data_conv_config_test(&imu, &data2Lora);
+				imu_data_conv_config(&imu, &data2Lora);
+//				imu_data_conv_config_test(&imu, &data2Lora);
 			} else if (curFlyMode == onFly) {
 				imu_data_conv_onFly(&imu, &data2Lora);
 			}
@@ -481,7 +488,7 @@ int main(void)
 				printf("LoRa_transmit timed out\n");
 			} else {
 				printf("LoRa_transmit seccessed\n");
-				HAL_Delay(100);
+				HAL_Delay(1000);
 			}
 			HAL_GPIO_WritePin(FEM_CPS_GPIO_Port, FEM_CPS_Pin, GPIO_PIN_SET);
 #endif
