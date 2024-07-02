@@ -30,7 +30,7 @@ int CR = 5;           //CodingRate
 int Preamble = 10;    //Preamble length
 
 //Enable receive and transmit function for convience
-bool receiveOn=0;
+bool receiveOn=1;
 bool transmitOn=1;
 
 //-------------------------------------------------------
@@ -50,6 +50,10 @@ void setup() {
   //Set LoRa RF parameters
   LoRa.setSPIFrequency(SPI_freq);
   LoRa.setTxPower(Power, PA_OUTPUT_RFO_PIN);
+  LoRa.setSpreadingFactor(7);
+  LoRa.setSignalBandwidth(125E3);
+  LoRa.setCodingRate4(5);
+  LoRa.setPreambleLength(10);
   // LoRa.disableInvertIQ();
   // LoRa.enableCrc();
   // LoRa.setGain(6);
@@ -95,7 +99,7 @@ void loop() {
     // Serial.println("In transmit");
     if (Serial.available() > 0) {
       int n = Serial.available();
-      int c = Serial.read();
+      uint8_t c = Serial.read();
       digitalWrite(pin_RFswitch, LOW);  // switch to transmit channel
       LoRa.beginPacket();               //header mode, reset FIFO
       // int readfromMatlab[50];
