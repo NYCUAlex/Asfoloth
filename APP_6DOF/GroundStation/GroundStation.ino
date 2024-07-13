@@ -36,7 +36,7 @@ bool transmitOn=1;
 //-------------------------------------------------------
 void setup() {
   //Initialize serial port
-  Serial.begin(9600);
+  Serial.begin(115200);
   while (!Serial);
 
   //Initialize LoRa
@@ -50,10 +50,10 @@ void setup() {
   //Set LoRa RF parameters
   LoRa.setSPIFrequency(SPI_freq);
   LoRa.setTxPower(Power, PA_OUTPUT_RFO_PIN);
-  LoRa.setSpreadingFactor(7);
-  LoRa.setSignalBandwidth(125E3);
-  LoRa.setCodingRate4(5);
-  LoRa.setPreambleLength(10);
+  LoRa.setSpreadingFactor(SF);
+  LoRa.setSignalBandwidth(BW);
+  LoRa.setCodingRate4(CR);
+  LoRa.setPreambleLength(Preamble);
   // LoRa.disableInvertIQ();
   // LoRa.enableCrc();
   // LoRa.setGain(6);
@@ -118,7 +118,7 @@ void loop() {
       // String readfromMatlab;
       // readfromMatlab = Serial.readString();
       // Serial.println(readfromMatlab);
-      char readfromMatlab[20];
+      // char readfromMatlab[20];
       // for (int i = 0;i<n;i++){
       //   // readfromMatlab[i] = Serial.read();
       //   // LoRa.print(send_lora[i]);
