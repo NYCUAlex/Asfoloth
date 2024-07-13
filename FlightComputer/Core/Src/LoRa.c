@@ -551,8 +551,10 @@ uint8_t LoRa_receive_single(LoRa* _LoRa, uint8_t* data, uint8_t length){
 		LoRa_write(_LoRa, RegFiFoAddPtr, 0); //set FiFoAddPtr to FiFoRxBaseAddr
 		//Rx mode request
 		LoRa_gotoMode(_LoRa, RXSINGLE_MODE);
+		HAL_Delay(10);
 	}
 	else if((cur_mode==RXSINGLE_MODE) && (read==0)){ //condition 2
+
 	}
 	else if((cur_mode!=RXSINGLE_MODE)&&((read&0x80)||(read&0x20))){// condition 3,4
 		LoRa_write(_LoRa, RegIrqFlags, read);  //clear IRQ

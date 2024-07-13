@@ -92,7 +92,15 @@ extern IMU imu;
 
 uint16_t data_counter;
 uint8_t data_hour, data_min, data_sec, data_subSec;
+/*temp init ##############################################################*/
+uint32_t ADC_read;
+int ADC_resolution=12;
+int Vin_temp = 3300;
+float Vout;//Vout,Vin_temp:in mV
+float Vbias = 500;//TMP36 0 degree bias=500mV
+float OutV_Temp_ratio=10;//OutV:mV,Temp:Celsius
 float data_PA_temp;
+/*temp init end###########################################################*/
 
 /* USER CODE END PV */
 
@@ -171,14 +179,31 @@ void proc_data_1_uint8(IMU_DATA_TO_SEND_t *data, uint8_t value) {
 	data->length += 1;
 }
 
+void proc_data_4_uint8(IMU_DATA_TO_SEND_t *data, uint32_t value) {
+	f32_t f32_value;
+	f32_value.u32 = value;
+	data->datas[data->length] = f32_value.u8[3];
+	data->length += 1;
+	data->datas[data->length] = f32_value.u8[2];
+	data->length += 1;
+	data->datas[data->length] = f32_value.u8[1];
+	data->length += 1;
+	data->datas[data->length] = f32_value.u8[0];
+	data->length += 1;
+}
+
 void imu_data_conv_config(IMU *imu, IMU_DATA_TO_SEND_t *out) {
 	out->length = 0;
+	memset(out->datas, 0, 1024);
 	proc_data_1_uint8(out, data_hour);
 	proc_data_1_uint8(out, data_min);
 	proc_data_1_uint8(out, data_sec);
 	proc_data_1_uint8(out, data_subSec);
 	proc_data_2_uint16(out, data_counter);
-	proc_data_2(out, imu->temp);
+	proc_data_4(out, imu->deltaQ[0]);
+	proc_data_4(out, imu->deltaQ[1]);
+	proc_data_4(out, imu->deltaQ[2]);
+	proc_data_4(out, imu->deltaQ[3]);
 	proc_data_4(out, imu->quaternionWXYZ[0]);
 	proc_data_4(out, imu->quaternionWXYZ[1]);
 	proc_data_4(out, imu->quaternionWXYZ[2]);
@@ -186,23 +211,29 @@ void imu_data_conv_config(IMU *imu, IMU_DATA_TO_SEND_t *out) {
 	proc_data_2(out, imu->rateOfTurnXYZ[0]);
 	proc_data_2(out, imu->rateOfTurnXYZ[1]);
 	proc_data_2(out, imu->rateOfTurnXYZ[2]);
-	proc_data_2(out, imu->freeAccelerationXYZ[0]);
-	proc_data_2(out, imu->freeAccelerationXYZ[1]);
-	proc_data_2(out, imu->freeAccelerationXYZ[2]);
 	proc_data_2(out, imu->accelerationXYZ[0]);
 	proc_data_2(out, imu->accelerationXYZ[1]);
 	proc_data_2(out, imu->accelerationXYZ[2]);
-	proc_data_2(out, imu->positionEcefXYZ[0]);
-	proc_data_2(out, imu->positionEcefXYZ[1]);
-	proc_data_2(out, imu->positionEcefXYZ[2]);
+	proc_data_2(out, imu->freeAccelerationXYZ[0]);
+	proc_data_2(out, imu->freeAccelerationXYZ[1]);
+	proc_data_2(out, imu->freeAccelerationXYZ[2]);
+	proc_data_4(out, imu->deltaV[0]);
+	proc_data_4(out, imu->deltaV[1]);
+	proc_data_4(out, imu->deltaV[2]);
+//	proc_data_2(out, imu->positionEcefXYZ[0]);
+//	proc_data_2(out, imu->positionEcefXYZ[1]);
+//	proc_data_2(out, imu->positionEcefXYZ[2]);
 	proc_data_4(out, imu->latitude);
 	proc_data_4(out, imu->longitude);
 	proc_data_4(out, imu->altitudeEllip);
 	proc_data_2(out, imu->velocityXYZ[0]);
 	proc_data_2(out, imu->velocityXYZ[1]);
 	proc_data_2(out, imu->velocityXYZ[2]);
-	proc_data_4(out, data_PA_temp);
-
+	proc_data_2(out, imu->temp);
+	proc_data_1_uint8(out, imu->myGnssData.fixtype);
+	proc_data_1_uint8(out, imu->myGnssData.numSV);
+	proc_data_4_uint8(out, imu->status);
+	proc_data_2(out, data_PA_temp);
 }
 
 void imu_data_conv_config_test(IMU *imu, IMU_DATA_TO_SEND_t *out) {
@@ -241,6 +272,7 @@ void imu_data_conv_config_test(IMU *imu, IMU_DATA_TO_SEND_t *out) {
 
 void imu_data_conv_onFly(IMU *imu, IMU_DATA_TO_SEND_t *out) {
 	out->length = 0;
+	memset(out->datas, 0, 1024);
 	proc_data_1_uint8(out, data_hour);
 	proc_data_1_uint8(out, data_min);
 	proc_data_1_uint8(out, data_sec);
@@ -256,9 +288,9 @@ void imu_data_conv_onFly(IMU *imu, IMU_DATA_TO_SEND_t *out) {
 	proc_data_2(out, imu->freeAccelerationXYZ[0]);
 	proc_data_2(out, imu->freeAccelerationXYZ[1]);
 	proc_data_2(out, imu->freeAccelerationXYZ[2]);
-	proc_data_2(out, imu->positionEcefXYZ[0]);
-	proc_data_2(out, imu->positionEcefXYZ[1]);
-	proc_data_2(out, imu->positionEcefXYZ[2]);
+	proc_data_4(out, imu->latitude);
+	proc_data_4(out, imu->longitude);
+	proc_data_4(out, imu->altitudeEllip);
 	proc_data_2(out, imu->velocityXYZ[0]);
 	proc_data_2(out, imu->velocityXYZ[1]);
 	proc_data_2(out, imu->velocityXYZ[2]);
@@ -271,8 +303,11 @@ typedef enum flymode {
 } flyMode;
 flyMode curFlyMode;
 uint32_t flyModeDebounce = 0;
+bool isIdle=false;
 
 bool lora_recv_open = false;
+int fly_delay = 200;
+int config_delay = 333;
 
 /* USER CODE END 0 */
 
@@ -349,28 +384,20 @@ int main(void)
 	}
 //	LoRa_setLowDaraRateOptimization(&myLoRa, 1);
 	LoRa_startReceiving(&myLoRa);
-	uint8_t received_data[8];
+	uint8_t received_data[128];
 	uint8_t packet_size = 0;
 	/*Lora init end===========================================================*/
 
 	IMU_Init();
 
-	/*temp init ##############################################################*/
-	uint32_t ADC_read;
-	int ADC_resolution=12;
-	int Vin_temp = 3300;
-	float Vout;//Vout,Vin_temp:in mV
-	float Vbias = 500;//TMP36 0 degree bias=500mV
-	float OutV_Temp_ratio=10;//OutV:mV,Temp:Celsius
-	float data_PA_temp;
-	/*temp init end###########################################################*/
 
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	uint32_t timer = HAL_GetTick();
+	uint32_t timer_fly = HAL_GetTick();
+	uint32_t timer_config = HAL_GetTick();
 	uint32_t loopRunTime = 0;
 	bool GPS_no_calied = true;
 
@@ -386,9 +413,8 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 		//IMU data gathering
-//		IMU_process_data();
-//
-//		IMU_State_mechine();
+		IMU_process_data();
+		IMU_State_mechine();
 
 		/* Get the RTC current Time */
 		HAL_RTC_GetTime(&hrtc, &GetTime, RTC_FORMAT_BIN);
@@ -431,80 +457,112 @@ int main(void)
 			flyModeDebounce = HAL_GetTick() + 1000;
 			if (curFlyMode == config) {
 				curFlyMode = onFly;
+				data_counter = 0;
 				printf("fly mode now --> on fly\n");
 			} else {
 				curFlyMode = config;
+				data_counter = 0;
 				printf("fly mode now --> config\n");
 			}
 		}
 		prevModeSwitch = modeSwitch;
 
-		//LoRa_receive()
-		HAL_GPIO_WritePin(FEM_CPS_GPIO_Port, FEM_CPS_Pin, GPIO_PIN_SET); //low frequency port switch, RESET for transmit, SET for receive
 
-//		packet_size = LoRa_receive(&myLoRa, received_data, 10);
-		packet_size = LoRa_receive_single(&myLoRa, received_data, sizeof(received_data)/sizeof(received_data[0]));
-		/*Process data*/
-		if (packet_size != 0) {
-			printf("LoRa get: %s", received_data);
-			if(received_data[0] == 1){ //reset frame
 
+		//packing data from IMU to send via Lora
+		if (curFlyMode == config) {
+			if (isIdle==false && HAL_GetTick()-timer_config>config_delay) {//current state = normal
+				data_hour = GetTime.Hours;
+				data_min = GetTime.Minutes;
+				data_sec = GetTime.Seconds;
+				data_subSec = ((float) (255 - GetTime.SubSeconds)) * 1.
+						/ ((float) (GetTime.SecondFraction + 1)) * 100;
+
+				/*temp sensor*/
+				HAL_ADC_Start(&hadc1);
+				ADC_read = HAL_ADC_GetValue(&hadc1);
+				Vout = ADC_read/(pow(2,ADC_resolution)-1)*Vin_temp;
+				data_PA_temp = (Vout-Vbias)/OutV_Temp_ratio;//temp:in Celsius
+		//		printf("temp: %f\n", data_PA_temp);
+
+				imu_data_conv_config(&imu, &data2Lora);
+	//				imu_data_conv_config_test(&imu, &data2Lora);
+
+				//LoRa_transmit()
+				HAL_GPIO_WritePin(FEM_CPS_GPIO_Port, FEM_CPS_Pin, GPIO_PIN_RESET);
+				uint8_t err = LoRa_transmit(&myLoRa, data2Lora.datas, data2Lora.length, TRANSMIT_TIMEOUT);
+				if (err == 0) {
+					printf("LoRa_transmit timed out\n");
+				} else {
+					printf("LoRa_transmit seccessed\n");
+	//				HAL_Delay(1);
+				}
+				HAL_GPIO_WritePin(FEM_CPS_GPIO_Port, FEM_CPS_Pin, GPIO_PIN_SET);
+				loopRunTime = HAL_GetTick() - loopRunTime;
+				printf("acc:%f,%f,%f,%f,%f,%d,%d,%d\n", imu.quaternionWXYZ[0],
+						imu.quaternionWXYZ[1], imu.quaternionWXYZ[2],
+						imu.quaternionWXYZ[3], data_PA_temp, data2Lora.length,
+						loopRunTime, data_counter);
+				loopRunTime = HAL_GetTick();
+				timer_config = HAL_GetTick();
 			}
-			if(received_data[0] == 3){ //switch to flight mode
-				curFlyMode = onFly;
-				printf("fly mode now --> on fly\n");
+
+			//LoRa_receive()
+			HAL_GPIO_WritePin(FEM_CPS_GPIO_Port, FEM_CPS_Pin, GPIO_PIN_SET); //low frequency port switch, RESET for transmit, SET for receive
+
+			memset(received_data, 0, sizeof(received_data)/sizeof(received_data[0]));
+			packet_size = LoRa_receive(&myLoRa, received_data, sizeof(received_data)/sizeof(received_data[0]));
+	//		packet_size = LoRa_receive_single(&myLoRa, received_data, sizeof(received_data)/sizeof(received_data[0]));
+
+			/*Process data*/
+			if (packet_size != 0) {
+				printf("LoRa get: %s\n", received_data);
+				if(received_data[0] == '1'){ //reset frame
+					xsens_mti_reset_orientation(&imu.imu_interface, XSENS_ORIENTATION_ALIGNMENT_RESET);
+				}
+				if(received_data[0] == '2'){ //command Idle state
+					isIdle=true;
+				}
+				if(received_data[0] == '3'){ //return Normal state
+					isIdle=false;
+					data_counter = 0;
+				}
+				if(received_data[0] == '4'){ //switch to flight mode
+					curFlyMode = onFly;
+					printf("fly mode now --> on fly\n");
+				}
 			}
-		}
 
-		/*temp sensor*/
-		HAL_ADC_Start(&hadc1);
-		ADC_read = HAL_ADC_GetValue(&hadc1);
-		Vout = ADC_read/(pow(2,ADC_resolution)-1)*Vin_temp;
-		data_PA_temp = (Vout-Vbias)/OutV_Temp_ratio;//temp:in Celsius
-		printf("temp: %f\n", data_PA_temp);
 
-		//====================================================================
-		if (HAL_GetTick() - timer > 333) {
-
+		} else if (curFlyMode == onFly && HAL_GetTick()-timer_fly>fly_delay) {
 			data_hour = GetTime.Hours;
 			data_min = GetTime.Minutes;
 			data_sec = GetTime.Seconds;
 			data_subSec = ((float) (255 - GetTime.SubSeconds)) * 1.
 					/ ((float) (GetTime.SecondFraction + 1)) * 100;
 
-			//packing data from IMU to send via Lora
-			if (curFlyMode == config) {
-				imu_data_conv_config(&imu, &data2Lora);
-//				imu_data_conv_config_test(&imu, &data2Lora);
-			} else if (curFlyMode == onFly) {
-				imu_data_conv_onFly(&imu, &data2Lora);
-			}
-
+			imu_data_conv_onFly(&imu, &data2Lora);
 			//LoRa_transmit()
-#if 1
 			HAL_GPIO_WritePin(FEM_CPS_GPIO_Port, FEM_CPS_Pin, GPIO_PIN_RESET);
 			uint8_t err = LoRa_transmit(&myLoRa, data2Lora.datas, data2Lora.length, TRANSMIT_TIMEOUT);
 			if (err == 0) {
 				printf("LoRa_transmit timed out\n");
 			} else {
 				printf("LoRa_transmit seccessed\n");
-				HAL_Delay(1000);
+//				HAL_Delay(1);
 			}
 			HAL_GPIO_WritePin(FEM_CPS_GPIO_Port, FEM_CPS_Pin, GPIO_PIN_SET);
-#endif
-
 			loopRunTime = HAL_GetTick() - loopRunTime;
-//			printf("acc:%f,%f,%f,%f,%f,%d,%d,%d\n", imu.quaternionWXYZ[0],
-//					imu.quaternionWXYZ[1], imu.quaternionWXYZ[2],
-//					imu.quaternionWXYZ[3], data_PA_temp, data2Lora.length,
-//					loopRunTime, data_counter);
-
-
-			timer = HAL_GetTick();
-			data_counter += 1;
+			printf("acc:%f,%f,%f,%f,%f,%d,%d,%d\n", imu.quaternionWXYZ[0],
+					imu.quaternionWXYZ[1], imu.quaternionWXYZ[2],
+					imu.quaternionWXYZ[3], data_PA_temp, data2Lora.length,
+					loopRunTime, data_counter);
 			loopRunTime = HAL_GetTick();
+			timer_fly = HAL_GetTick();
 		}
 	}
+
+	data_counter += 1;
   /* USER CODE END 3 */
 }
 

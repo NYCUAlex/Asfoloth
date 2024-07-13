@@ -77,6 +77,8 @@ typedef struct{
 	float rateOfTurnXYZ[3];
 	float freeAccelerationXYZ[3];
 	float accelerationXYZ[3];
+	float deltaQ[4];
+	float deltaV[3];
 	GnssPvtData_t myGnssData;
 	uint32_t status;
 	float positionEcefXYZ[3];

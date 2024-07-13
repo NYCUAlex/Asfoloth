@@ -20,5 +20,5 @@
 ../Core/Src/LoRa.c:479:6:LoRa_startReceiving	16	static
 ../Core/Src/LoRa.c:495:9:LoRa_receive	48	static
 ../Core/Src/LoRa.c:530:9:LoRa_receive_single	48	static
-../Core/Src/LoRa.c:587:5:LoRa_getRSSI	24	static
-../Core/Src/LoRa.c:603:10:LoRa_init	24	static
+../Core/Src/LoRa.c:589:5:LoRa_getRSSI	24	static
+../Core/Src/LoRa.c:605:10:LoRa_init	24	static

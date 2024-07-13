@@ -263,6 +263,25 @@ void imu_callback(XsensEventFlag_t event, XsensEventData_t *mtdata) {
 		}
 	break;
 
+	case XSENS_EVT_DELTA_Q:
+		if (mtdata->type == XSENS_EVT_TYPE_FLOAT4) {
+			imu.deltaQ[0] = mtdata->data.f4x4[0];
+			imu.deltaQ[1] = mtdata->data.f4x4[1];
+			imu.deltaQ[2] = mtdata->data.f4x4[2];
+			imu.deltaQ[3] = mtdata->data.f4x4[3];
+//			printf("get deltaQ\n");
+		}
+	break;
+
+	case XSENS_EVT_DELTA_V:
+		if (mtdata->type == XSENS_EVT_TYPE_FLOAT3) {
+			imu.deltaV[0] = mtdata->data.f4x3[0];
+			imu.deltaV[1] = mtdata->data.f4x3[1];
+			imu.deltaV[2] = mtdata->data.f4x3[2];
+//       printf("get deltaV\n");
+		}
+	break;
+
 	case XSENS_EVT_GNSS_PVT_DATA:
 		if (mtdata->type == XSENS_EVT_TYPE_GNSS_DATA) {
 			imu.myGnssData = gnssPvt_parse(mtdata->gnssPvtData);
@@ -366,16 +385,18 @@ void changeOutputRate(int output_rate){
 	XsensFrequencyConfig_t settings[] = {
 //			{ .id = XDI_PACKET_COUNTER, .frequency = 0xFFFF },
 //			{ .id = XDI_SAMPLE_TIME_FINE, .frequency = 0xFFFF },
-		{ .id = XDI_TEMPERATURE, 				.frequency = output_rate },
-		{ .id =	XDI_QUATERNION, 				.frequency = output_rate },
+		{ .id = XDI_TEMPERATURE, 			.frequency = output_rate },
+		{ .id =	XDI_QUATERNION, 			.frequency = output_rate },
 		{ .id =	XDI_RATE_OF_TURN, 			.frequency = output_rate },
-		{ .id = XDI_FREE_ACCELERATION, 	.frequency = output_rate },
+		{ .id = XDI_FREE_ACCELERATION, 		.frequency = output_rate },
 		{ .id = XDI_ACCELERATION, 			.frequency = output_rate },
+		{ .id = XDI_DELTA_Q, 				.frequency = output_rate },
+		{ .id = XDI_DELTA_V, 				.frequency = output_rate },
 		{ .id = XDI_GNSS_PVT_DATA, 			.frequency = 4 },
-		{ .id = XDI_STATUS_WORD, 				.frequency = output_rate },
+		{ .id = XDI_STATUS_WORD, 			.frequency = output_rate },
 		{ .id = XDI_POSITION_ECEF,			.frequency = output_rate },
-		{ .id = XDI_LAT_LON, 						.frequency = 4 },
-		{ .id = XDI_ALTITUDE_ELLIPSOID, .frequency = 4 },
+		{ .id = XDI_LAT_LON, 				.frequency = 4 },
+		{ .id = XDI_ALTITUDE_ELLIPSOID, 	.frequency = 4 },
 		{ .id =	XDI_VELOCITY_XYZ, 			.frequency = output_rate },
 //		  { .id = XSENS_IDENTIFIER_FORMAT(XDI_QUATERNION, XSENS_FLOAT_FIXED1220, XSENS_COORD_ENU), .frequency = 100 },
 	};
