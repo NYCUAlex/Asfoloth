@@ -307,7 +307,7 @@ bool isIdle=false;
 
 bool lora_recv_open = false;
 int fly_delay = 200;
-int config_delay = 333;
+int config_delay = 200;
 
 /* USER CODE END 0 */
 
@@ -505,6 +505,7 @@ int main(void)
 						loopRunTime, data_counter);
 				loopRunTime = HAL_GetTick();
 				timer_config = HAL_GetTick();
+				data_counter += 1;
 			}
 
 			//LoRa_receive()
@@ -529,6 +530,7 @@ int main(void)
 				}
 				if(received_data[0] == '4'){ //switch to flight mode
 					curFlyMode = onFly;
+					data_counter = 0;
 					printf("fly mode now --> on fly\n");
 				}
 			}
@@ -559,10 +561,9 @@ int main(void)
 					loopRunTime, data_counter);
 			loopRunTime = HAL_GetTick();
 			timer_fly = HAL_GetTick();
+			data_counter += 1;
 		}
 	}
-
-	data_counter += 1;
   /* USER CODE END 3 */
 }
 
