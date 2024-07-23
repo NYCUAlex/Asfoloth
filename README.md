@@ -9,7 +9,8 @@ Project for Asfoloth sounding rocket. Integrating flight computer program, elect
 ---
 # CAD:
    - software: Solidworks 2021
-   - include: Asfoloth launch 1 avionics structure assembly 
+   - include: Asfoloth launch 1 avionics structure assembly
+   - ![image](https://github.com/NYCUAlex/Asfoloth/blob/main/avionics%20final%20CAD.png)
 ---
 # FC:
    - software: Stm32CubeIDE
