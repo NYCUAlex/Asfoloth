@@ -1,6 +1,6 @@
 Core/Src/LoRa.o: ../Core/Src/LoRa.c \
- D:/YiYuan/Asfoloth/FlightComputer/LoRa/LoRa.h ../Core/Inc/main.h \
- ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
+ C:/Users/liuwilly/Desktop/Asfoloth/FlightComputer/LoRa/LoRa.h \
+ ../Core/Inc/main.h ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h \
@@ -38,7 +38,7 @@ Core/Src/LoRa.o: ../Core/Src/LoRa.c \
  ../Core/Inc/IMU_rel/xsens_utility.h ../Core/Inc/IMU_rel/xsens_mdata2.h \
  ../Core/Inc/IMU_rel/float16Tool.h \
  ../Core/Inc/IMU_rel/gnssPvtDataParser.h
-D:/YiYuan/Asfoloth/FlightComputer/LoRa/LoRa.h:
+C:/Users/liuwilly/Desktop/Asfoloth/FlightComputer/LoRa/LoRa.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:

@@ -27,7 +27,7 @@ int Power = 25;       //TxPower
 int SF = 7;           //SpreadingFactor
 int BW = 125E3;       //Signal bandwidth
 int CR = 5;           //CodingRate
-int Preamble = 10;    //Preamble length
+int Preamble = 8;    //Preamble length
 
 //Enable receive and transmit function for convience
 bool receiveOn=1;

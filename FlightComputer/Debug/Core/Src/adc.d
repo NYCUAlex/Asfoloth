@@ -36,7 +36,8 @@ Core/Src/adc.o: ../Core/Src/adc.c ../Core/Inc/adc.h ../Core/Inc/main.h \
  ../Core/Inc/IMU_rel/xsens_utility.h ../Core/Inc/IMU_rel/xsens_mdata2.h \
  ../Core/Inc/IMU_rel/float16Tool.h \
  ../Core/Inc/IMU_rel/gnssPvtDataParser.h \
- D:/YiYuan/Asfoloth/FlightComputer/LoRa/LoRa.h ../Core/Inc/main.h
+ C:/Users/liuwilly/Desktop/Asfoloth/FlightComputer/LoRa/LoRa.h \
+ ../Core/Inc/main.h
 ../Core/Inc/adc.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
@@ -80,5 +81,5 @@ Core/Src/adc.o: ../Core/Src/adc.c ../Core/Inc/adc.h ../Core/Inc/main.h \
 ../Core/Inc/IMU_rel/xsens_mdata2.h:
 ../Core/Inc/IMU_rel/float16Tool.h:
 ../Core/Inc/IMU_rel/gnssPvtDataParser.h:
-D:/YiYuan/Asfoloth/FlightComputer/LoRa/LoRa.h:
+C:/Users/liuwilly/Desktop/Asfoloth/FlightComputer/LoRa/LoRa.h:
 ../Core/Inc/main.h:

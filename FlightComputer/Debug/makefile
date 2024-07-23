@@ -61,8 +61,8 @@ all: main-build
 main-build: FC_SPI_NEW.elf secondary-outputs
 
 # Tool invocations
-FC_SPI_NEW.elf FC_SPI_NEW.map: $(OBJS) $(USER_OBJS) D:\YiYuan\Asfoloth\FlightComputer\STM32F429ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "FC_SPI_NEW.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\YiYuan\Asfoloth\FlightComputer\STM32F429ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="FC_SPI_NEW.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+FC_SPI_NEW.elf FC_SPI_NEW.map: $(OBJS) $(USER_OBJS) C:\Users\liuwilly\Desktop\Asfoloth\FlightComputer\STM32F429ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "FC_SPI_NEW.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\liuwilly\Desktop\Asfoloth\FlightComputer\STM32F429ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="FC_SPI_NEW.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

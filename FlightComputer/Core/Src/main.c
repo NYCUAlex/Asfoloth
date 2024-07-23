@@ -297,17 +297,20 @@ void imu_data_conv_onFly(IMU *imu, IMU_DATA_TO_SEND_t *out) {
 
 }
 
-GPIO_PinState modeSwitch = 0, prevModeSwitch = 0;
+GPIO_PinState modeSwitch = 0;
+bool state=false, prevstate = false;
 typedef enum flymode {
 	config, onFly
 } flyMode;
-flyMode curFlyMode;
-uint32_t flyModeDebounce = 0;
+flyMode curFlyMode=0;
+uint32_t flyModeDebounce=1000;
+float debouncedValue = 0;
+float a=0.00033;
 bool isIdle=false;
 
 bool lora_recv_open = false;
-int fly_delay = 200;
-int config_delay = 200;
+int fly_delay = 200-101;
+int config_delay = 1000-169;
 
 /* USER CODE END 0 */
 
@@ -368,12 +371,12 @@ int main(void)
 	myLoRa.outputpower = 10;                // 0~15, Pout(RFO) = Pmax-(15-outputpower), Pout(PA_BOOST) = = 17-(15-outputpower)
 	myLoRa.PaDac = 0x84;                    // 0x84:max power = 17dBm   0x87:max power = 20dBm in PA_BOOST pin//-4~15
 	myLoRa.overCurrentProtection = 100;     // default = 100 		mA
-	myLoRa.bandWidth = BW_125KHz;       	// default = BW_125	KHz
+	myLoRa.bandWidth = BW_250KHz;       	// default = BW_125	KHz
 	myLoRa.crcRate = CR_4_5;          		// default = CR_4_5
 	myLoRa.implicit_on = EXPLICIT;          // default = EXPLICIT
-	myLoRa.spredingFactor = SF_7;           // default = SF_7
+	myLoRa.spredingFactor = SF_8;           // default = SF_7
 	myLoRa.CRCon = 0;
-	myLoRa.preamble = 10;              		// default = 8;
+	myLoRa.preamble = 8;              		// default = 8;
 	myLoRa.TCXOon = 0;
 
 	uint16_t LoRa_status = LoRa_init(&myLoRa);
@@ -450,9 +453,17 @@ int main(void)
 		}
 
 		/*check fly mode switch*/
-		modeSwitch = HAL_GPIO_ReadPin(Mode_Switch_GPIO_Port,
-		Mode_Switch_Pin);
-		if (modeSwitch == GPIO_PIN_RESET && prevModeSwitch == GPIO_PIN_SET
+		modeSwitch = HAL_GPIO_ReadPin(Mode_Switch_GPIO_Port, Mode_Switch_Pin);
+		if(modeSwitch == SET){
+			debouncedValue+=a;
+		}else{
+			debouncedValue-=a;
+		}
+//		printf("a:%f\n", debouncedValue);
+		if(debouncedValue > 1) debouncedValue=1;
+		if(debouncedValue < 0) debouncedValue=0;
+		state = (debouncedValue > 0.7);
+		if (state == false && prevstate == true
 				&& HAL_GetTick() > flyModeDebounce) {
 			flyModeDebounce = HAL_GetTick() + 1000;
 			if (curFlyMode == config) {
@@ -465,7 +476,7 @@ int main(void)
 				printf("fly mode now --> config\n");
 			}
 		}
-		prevModeSwitch = modeSwitch;
+		prevstate = state;
 
 
 
