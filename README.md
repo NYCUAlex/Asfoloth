@@ -1,10 +1,10 @@
-# Asfoloth
-Project for Asfoloth sounding rocket. Integrating flight computer program, electronic hardware design, structure connection in avionics section, 6-DOF simulation, TT&amp;C ground station simulation, etc...
+# Asfaloth
+Project for Asfaloth sounding rocket. Integrating flight computer program, electronic hardware design, structure connection in avionics section, 6-DOF simulation, TT&amp;C ground station simulation, etc...
 
 ---
 # APP: 
    - software: Matlab 2023b, Arduino
-   - include: 6-DOF simulink simulator, TT&C ground station simulator using Matlab APP
+   - include: TT&C ground station simulator using Matlab APP
     ![image](https://github.com/NYCUAlex/Asfoloth/blob/main/TT_C%20ground%20station%20sim.png) 
 ---
 # CAD:
